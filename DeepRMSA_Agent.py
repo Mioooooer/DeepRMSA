@@ -8,12 +8,16 @@ import math
 import copy
 import random
 import datetime
-import tensorflow.contrib.slim as slim
+#import tensorflow.contrib.slim as slim
+import tf_slim as slim
 from AC_Net import AC_Net
 import threading
 import multiprocessing
-import tensorflow as tf
-import tensorflow.contrib.slim as slim
+#import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+#import tensorflow.contrib.slim as slim
+import tf_slim as slim
 import scipy.signal
 from random import choice
 from time import sleep

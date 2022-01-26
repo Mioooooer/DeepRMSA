@@ -1,13 +1,16 @@
 from __future__ import division
 import numpy as np
-import tensorflow as tf
+#import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import multiprocessing
 import threading
 import os
 from random import choice
 from time import sleep
 from time import time
-import tensorflow.contrib.slim as slim
+#import tensorflow.contrib.slim as slim
+import tf_slim as slim
 import scipy.signal
 import struct
 from collections import defaultdict
@@ -160,11 +163,15 @@ load_model = False#True
 model_path = 'model'
 
 tf.reset_default_graph()
+#from tensorflow.python.framework import ops
+#ops.reset_default_graph()
 
 with tf.device("/cpu:0"):
     global_episodes = tf.Variable(0, dtype = tf.int32, name = 'global_episodes', trainable = False)
     trainer = tf.train.AdamOptimizer(learning_rate = 1e-5)
+    #trainer = tf.optimizers.Adam(learning_rate = 1e-5)
     #trainer = tf.train.RMSPropOptimizer(learning_rate = 1e-5, decay = 0.99, epsilon = 0.0001)
+    #trainer = tf.optimizers.RMSprop(learning_rate = 1e-5, decay = 0.99, epsilon = 0.0001)
     master_network = AC_Net(scope = 'global',
                             trainer = None,
                             x_dim_p = x_dim_p,

@@ -1,13 +1,17 @@
 from __future__ import division
 import numpy as np
-import tensorflow as tf
+#import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 from collections import deque
 import random
 import string
-import tensorflow.contrib.slim as slim
+#import tensorflow.contrib.slim as slim
+import tf_slim as slim
 
 np.random.seed(1)
 tf.set_random_seed(1)
+#tf.random.set_seed(1)
 
 class AC_Net:
 
@@ -21,14 +25,19 @@ class AC_Net:
         self.regu_scalar = regu_scalar
         self.trainer = trainer
         
-        self.regularizer = tf.contrib.layers.l2_regularizer(self.regu_scalar, scope = None)
-        
+        #self.regularizer = tf.contrib.layers.l2_regularizer(self.regu_scalar, scope = None)
+        self.regularizer = tf.keras.regularizers.l2(self.regu_scalar)
+
         self.w_initializer, self.b_initializer = tf.random_normal_initializer(0., 0.3), tf.constant_initializer(0.1)
         
         self.Input_p = tf.placeholder(tf.float32, [None, self.x_dim_p], name='policy_input')
         self.Input_v = tf.placeholder(tf.float32, [None, self.x_dim_v], name='value_input')
-        
+        #tf.compat.v1.disable_eager_execution()
+        #self.Input_p = tf.compat.v1.placeholder(tf.float32, [None, self.x_dim_p], name='policy_input')
+        #self.Input_v = tf.compat.v1.placeholder(tf.float32, [None, self.x_dim_v], name='value_input')
+
         with tf.variable_scope(self.scope):
+        #with tf.compat.v1.variable_scope(self.scope):
             
             with tf.variable_scope('policy', regularizer = self.regularizer): # Policy Q-Network
                 self.policy = slim.fully_connected(self.dnn(self.Input_p), self.n_actions,
@@ -44,9 +53,12 @@ class AC_Net:
             
             #Only the worker network need ops for loss functions and gradient updating.
             if self.scope != 'global':
+                #self.actions = tf.placeholder(shape=[None], dtype=tf.int32)
                 self.actions = tf.placeholder(shape=[None], dtype=tf.int32)
                 self.actions_onehot = tf.one_hot(self.actions, self.n_actions, dtype=tf.float32)
+                #self.target_v = tf.placeholder(shape=[None], dtype=tf.float32)
                 self.target_v = tf.placeholder(shape=[None], dtype=tf.float32)
+                #self.advantages = tf.placeholder(shape=[None], dtype=tf.float32)
                 self.advantages = tf.placeholder(shape=[None], dtype=tf.float32)
 
                 self.responsible_outputs = tf.reduce_sum(self.policy * self.actions_onehot, [1])
