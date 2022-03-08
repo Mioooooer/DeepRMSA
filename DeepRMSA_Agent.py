@@ -543,11 +543,11 @@ class DeepRMSA_Agent():
                 # Periodically save model parameters, and summary statistics.
                 sample_step = int(1000/self.episode_size)
                 if episode_count % sample_step == 0 and episode_count != 0:
-                    '''if episode_count % (100*sample_step) == 0 and self.name == 'agent_0':
-                        saver.save(sess, self.model_path+'/model.cptk')
-                        print ("Model Saved")'''
+                    if episode_count % (100*sample_step) == 0 and self.name == 'agent_0':
+                        saver.save(sess, self.model_path+'/model.ckpt')
+                        print ("Model Saved")
 
-                    '''if self.name == 'agent_0':
+                    if self.name == 'agent_0':
                         mean_reward = np.mean(self.episode_rewards[-sample_step:])
                         mean_value = np.mean(self.episode_mean_values[-sample_step:])
                         mean_blocking = np.mean(self.episode_blocking[-sample_step:])
@@ -566,6 +566,6 @@ class DeepRMSA_Agent():
                         summary.value.add(tag='Losses/Regu Loss Value', simple_value=float(regu_loss_value))
                         self.summary_writer.add_summary(summary, episode_count)
 
-                        self.summary_writer.flush()'''
+                        self.summary_writer.flush()
                 if self.name == 'agent_0':
                     sess.run(self.increment)
