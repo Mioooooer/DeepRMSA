@@ -479,7 +479,8 @@ class DeepRMSA_Agent():
                         else:
                             blocking = 1
                     
-                    r_t = 1 - 2*blocking # successful, 1, blocked, -1
+                    #r_t = 1 - 2*blocking # successful, 1, blocked, -1
+                    r_t = 1 - 11*blocking # successful, 1, blocked, -10
                     #r_t = 1 - blocking
                     num_blocks += blocking
                     
