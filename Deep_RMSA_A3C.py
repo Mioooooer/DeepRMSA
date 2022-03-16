@@ -159,7 +159,7 @@ for ii in range(1,NODE_NUM*NODE_NUM+1):#NODE_NUM*NODE_NUM import precalculated p
 fp.close()
 # -----------------------------------------------------------
 
-load_model = True#True
+load_model = False#True
 model_path = 'model'
 
 tf.reset_default_graph()

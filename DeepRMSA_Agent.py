@@ -245,6 +245,43 @@ class DeepRMSA_Agent():
             num_FS = math.ceil(bandwidth/(1*12.5))+1
         return int(num_FS)
     
+    def cal_reward_discount(self, path_len):
+        if path_len <= 625:
+            reward_discount = 4
+        elif path_len <= 1250:
+            reward_discount = 3
+        elif path_len <= 2500:
+            reward_discount = 2
+        else:
+            reward_discount = 1
+        return int(reward_discount)
+
+    def cal_sep(self, path_link, slot_map, Fs, Fe):
+        temp_cal = 0
+        mean_sep = 0
+        for ll in path_link:
+            temp_array = slot_map[ll]
+            if (Fs != 0) and (Fe != (len(temp_array)-1)):
+                temp_front_array = temp_array[:Fs]
+                temp_rear_array = temp_array[Fe+1:]
+                if 0 in temp_front_array:
+                    temp_reverse = list(reversed(temp_front_array))
+                    temp_front_num = temp_reverse.index(0)
+                else:
+                    temp_front_num = Fs
+
+                if 0 in temp_rear_array:
+                    temp_rear_num = temp_rear_array.index(0)
+                else:
+                    temp_rear_num = len(temp_array)-1-Fe
+                
+                temp_cal = min(temp_front_num, temp_rear_num)
+            else:
+                temp_cal = 0
+            mean_sep += temp_cal
+        mean_sep = mean_sep/len(path_link)
+        return mean_sep
+
     # Discounting function used to calculate discounted returns.
     def discount(self, x):
         return scipy.signal.lfilter([1], [1, -self.gamma], x[::-1], axis=0)[::-1]
@@ -458,6 +495,8 @@ class DeepRMSA_Agent():
 
                     actionss.append(action_id)
 
+                    seperation = 0
+                    reward_discount = 0
                     # apply the selected action
                     if len(path) == 0: # selected an invalid action
                         blocking = 1
@@ -469,6 +508,8 @@ class DeepRMSA_Agent():
                         slot_temp = self.get_new_slot_temp(slot_temp, path_links, self.slot_map)  # spectrum utilization on the whole path
                         (flag, fs_start, fs_end) = self.judge_availability(slot_temp, num_FS, FS_id)
                         if flag == 1:
+                            seperation = self.cal_sep(path_links, self.slot_map, fs_start, fs_end) # for reward calculating used
+                            reward_discount = self.cal_reward_discount(path_len)
                             self.slot_map, self.slot_map_t = self.update_slot_map_for_committing_wp(self.slot_map, path_links, fs_start, fs_end, self.slot_map_t, current_TTL)  # update slotmap
                             temp_ = []  # update in-service requests
                             temp_.append(list(path_links))
@@ -483,7 +524,12 @@ class DeepRMSA_Agent():
                     #r_t = 1 - blocking
                     num_blocks += blocking
                     
-                    episode_reward += r_t
+                    if r_t > 0:
+                        episode_reward += reward_discount/(seperation + 1)
+                    else:
+                        episode_reward += r_t
+
+                    #episode_reward += r_t
                     total_steps += 1
                     episode_step_count += 1
                     
