@@ -525,11 +525,20 @@ class DeepRMSA_Agent():
                     num_blocks += blocking
                     
                     if r_t > 0:
-                        episode_reward += reward_discount/(seperation + 1)
+                        #episode_reward += reward_discount/(seperation + 1)
+                        #episode_reward += reward_discount/math.exp(seperation)
+                        if seperation < 1:
+                            episode_reward += reward_discount
+                        elif seperation < 2:
+                            episode_reward += reward_discount/20
+                        else:
+                            episode_reward += reward_discount/(seperation + 1)
                     else:
                         episode_reward += r_t
 
                     #episode_reward += r_t
+                    #print(reward_discount/(seperation + 1))
+
                     total_steps += 1
                     episode_step_count += 1
                     
@@ -613,5 +622,6 @@ class DeepRMSA_Agent():
                         self.summary_writer.add_summary(summary, episode_count)
 
                         self.summary_writer.flush()
+                        #self.summary_writer.add_graph(sess.graph)
                 if self.name == 'agent_0':
                     sess.run(self.increment)
